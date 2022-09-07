@@ -5,6 +5,12 @@ use Phalcon\Di\FactoryDefault;
 
 error_reporting(E_ALL);
 
+// Forbiz 솔루션 버젼
+define('BASE_FRAMEWORK_VERSION', 'Phalcon-4.1.2');
+define('FORBIZ_MALL_VERSION', '4.5');
+define('FORBIZ_SCM_VERSION', '4.5');
+define('META_COMMERCE_VERSION', '1.3.9');
+
 define('BASE_PATH', dirname(__DIR__));
 define('APP_PATH', BASE_PATH . '/../core/framework/app');
 
@@ -35,12 +41,21 @@ try {
      */
     include APP_PATH . '/config/loader.php';
 
+//    echo '<xmp>';
+    var_dump($router->getControllerName());
+    var_dump($router->getActionName());
+    var_dump($router->getParams());
+    echo '<xmp>';
+    print_r($di);
+    exit;
+
     /**
      * Handle the request
      */
-    $application = new \Phalcon\Mvc\Application($di);
-
-    echo $application->handle($_SERVER['REQUEST_URI'])->getContent();
+//    $application = new \Phalcon\Mvc\Application($di);
+//
+//
+//    echo $application->handle($_SERVER['REQUEST_URI'])->getContent();
 } catch (\Exception $e) {
     echo $e->getMessage() . '<br>';
     echo '<pre>' . $e->getTraceAsString() . '</pre>';

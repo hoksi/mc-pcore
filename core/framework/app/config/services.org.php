@@ -4,6 +4,11 @@ declare(strict_types=1);
 use Phalcon\Escaper;
 use Phalcon\Flash\Direct as Flash;
 use Phalcon\Mvc\Model\Metadata\Memory as MetaDataAdapter;
+use Phalcon\Mvc\View;
+use Phalcon\Mvc\View\Engine\Php as PhpEngine;
+use Phalcon\Mvc\View\Engine\Volt as VoltEngine;
+use Phalcon\Session\Adapter\Stream as SessionAdapter;
+use Phalcon\Session\Manager as SessionManager;
 use Phalcon\Url as UrlResolver;
 
 /**
@@ -23,6 +28,36 @@ $di->setShared('url', function () {
     $url->setBaseUri($config->application->baseUri);
 
     return $url;
+});
+
+/**
+ * Setting up the view component
+ */
+$di->setShared('view', function () {
+    $config = $this->getConfig();
+
+    $view = new View();
+    $view->setDI($this);
+    $view->setViewsDir($config->application->viewsDir);
+
+    $view->registerEngines([
+        '.volt' => function ($view) {
+            $config = $this->getConfig();
+
+            $volt = new VoltEngine($view, $this);
+
+            $volt->setOptions([
+                'path' => $config->application->cacheDir,
+                'separator' => '_'
+            ]);
+
+            return $volt;
+        },
+        '.phtml' => PhpEngine::class
+
+    ]);
+
+    return $view;
 });
 
 /**
@@ -70,4 +105,18 @@ $di->set('flash', function () {
     ]);
 
     return $flash;
+});
+
+/**
+ * Start the session the first time some component request the session service
+ */
+$di->setShared('session', function () {
+    $session = new SessionManager();
+    $files = new SessionAdapter([
+        'savePath' => sys_get_temp_dir(),
+    ]);
+    $session->setAdapter($files);
+    $session->start();
+
+    return $session;
 });
